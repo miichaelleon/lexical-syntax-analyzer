@@ -4,7 +4,6 @@ A hand-written **lexical analyzer** and **recursive-descent syntax parser** for 
 
 ![C++](https://img.shields.io/badge/C++-00599C?logo=cplusplus&logoColor=white)
 ![Make](https://img.shields.io/badge/build-make-green)
-![GCC 10.2.0](https://img.shields.io/badge/GCC-10.2.0-blue)
 
 ## Overview
 
