@@ -13,7 +13,7 @@ The project is two command-line programs that make up the front end of a compile
 - **`cooke_parser`** - the syntax parser. Reuses the scanning logic and a recursive-descent strategy to verify that a program
    conforms to the grammar, reporting the first syntax error if one exists.
 
-- Source files use the `.dc` extension, named after Daniel Cooke.
+- Source files use the `.dc` extension, named after Daniel Cooke, a Texas Tech University professor who designed SequenceL.
 
 ## The Cooke Language
 
