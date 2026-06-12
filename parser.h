@@ -1,16 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-void program();
-
-void statement();
-void statement_not();
-void condition();
-void expression();
-void term();
-void term_not();
-void factor();
-void operation();
+void program(std::ifstream& infile);
 
 extern int next_token;
 extern std::string lexeme;

@@ -3,30 +3,38 @@
 #include "parser.h"
 #include "lexer.h"
 
+static void statement(std::ifstream& infile);
+static void statement_not(std::ifstream& infile);
+static void condition(std::ifstream& infile);
+static void expression(std::ifstream& infile);
+static void term(std::ifstream& infile);
+static void factor(std::ifstream& infile);
+static void operation(std::ifstream& infile);
+
 static void error();
 
-void program() {
-    statement();
+void program(std::ifstream& infile) {
+    statement(infile);
 }
 
-void statement() {
+static void statement(std::ifstream& infile) {
     if (next_token == IDENT) {
-        lex();
+        lex(infile);
         if(next_token == ASSIGN_OP)  {
-            lex();
-            expression(); //1
-            statement_not();
+            lex(infile);
+            expression(infile); //1
+            statement_not(infile);
         } else {
             error();
         }
     } else if (next_token == KEY_READ) {
-        lex();
+        lex(infile);
         if (next_token == LEFT_PAREN) {
-            lex();
-            expression();
+            lex(infile);
+            expression(infile);
             if (next_token == RIGHT_PAREN) {
-                lex();
-                statement_not();
+                lex(infile);
+                statement_not(infile);
             } else {
                 error();
             }
@@ -34,17 +42,17 @@ void statement() {
             error();
         }
     } else if (next_token == INC_OP || next_token == DEC_OP) {
-        operation();
-        statement_not();
+        operation(infile);
+        statement_not(infile);
     } else if (next_token == KEY_READ) {
-        lex();
+        lex(infile);
         if (next_token == LEFT_PAREN) {
-            lex();
+            lex(infile);
             if (next_token == IDENT) {
-                lex();
+                lex(infile);
                 if (next_token == RIGHT_PAREN) {
-                    lex();
-                    statement_not();
+                    lex(infile);
+                    statement_not(infile);
                 } else {
                     error();
                 }
@@ -55,13 +63,13 @@ void statement() {
             error();
         }
     } else if (next_token == KEY_PRINT) {
-        lex();
+        lex(infile);
         if (next_token == LEFT_PAREN) {
-            lex();
-            expression();
+            lex(infile);
+            expression(infile);
             if (next_token == RIGHT_PAREN) {
-                lex();
-                statement_not();
+                lex(infile);
+                statement_not(infile);
             } else {
                 error();
             }
@@ -69,24 +77,24 @@ void statement() {
             error();
         }
     } else if (next_token == KEY_IF) {
-        lex();
-        condition();
+        lex(infile);
+        condition(infile);
         if (next_token == COLON) {
-            lex();
+            lex(infile);
             if (next_token == KEY_BEGIN) {
-                lex();
-                statement();
+                lex(infile);
+                statement(infile);
                 if (next_token == KEY_END) {
-                    lex();
-                    statement_not();
+                    lex(infile);
+                    statement_not(infile);
                 } else if (next_token == KEY_ELSE) {
-                    lex();
+                    lex(infile);
                     if (next_token == COLON) {
-                        lex();
-                        statement();
+                        lex(infile);
+                        statement(infile);
                         if (next_token == KEY_END) {
-                            lex();
-                            statement_not();
+                            lex(infile);
+                            statement_not(infile);
                         } else {
                             error();
                         }
@@ -108,56 +116,56 @@ void statement() {
     }
 }
 
-void statement_not() {
+static void statement_not(std::ifstream& infile) {
     if (next_token == SEMICOLON) {
-        lex();
-        statement();
-        statement_not();
+        lex(infile);
+        statement(infile);
+        statement_not(infile);
     } else if (next_token == EOF) {
         std::cout << "Syntax Validated." << std::endl;
         exit(0);
     }
 }
 
-void condition() {
-    expression();
+static void condition(std::ifstream& infile) {
+    expression(infile);
 
     if (next_token == LESSER_OP ||next_token == GREATER_OP || next_token == EQUAL_OP ||
         next_token == NEQUAL_OP|| next_token == LEQUAL_OP  || next_token == GEQUAL_OP) {
-        lex();
-        expression();
+        lex(infile);
+        expression(infile);
     }
 }
 
-void expression() {
-    term(); //1
+static void expression(std::ifstream& infile) {
+    term(infile); //1
 
     while (next_token == ADD_OP || next_token == SUB_OP) {
-        lex();
-        term();
+        lex(infile);
+        term(infile);
     }
 } 
 
-void term() {
-    factor(); //2
+static void term(std::ifstream& infile) {
+    factor(infile); //2
 
     while (next_token == MULT_OP || next_token == DIV_OP || next_token == POW_OP) {
-            lex();
-            factor();
+            lex(infile);
+            factor(infile);
     }
 
 }
 
-void factor() {
+static void factor(std::ifstream& infile) {
     if (next_token == IDENT || next_token == INT_LIT) {
-        lex();
+        lex(infile);
     } else {
         if (next_token == LEFT_PAREN) {
-            lex(); 
-            expression(); //3
+            lex(infile); 
+            expression(infile); //3
 
             if (next_token == RIGHT_PAREN) {
-                lex(); 
+                lex(infile); 
             } else { 
                 error();
             }
@@ -167,11 +175,11 @@ void factor() {
     }
 } 
 
-void operation() {
+static void operation(std::ifstream& infile) {
     if (next_token == INC_OP || next_token == DEC_OP) {
-        lex();
+        lex(infile);
         if (next_token == IDENT) {
-            lex();
+            lex(infile);
         } else {
             error();
         }

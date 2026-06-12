@@ -39,6 +39,6 @@
 #define UNKNOWN 99
 
 
-int lex();
+int lex(std::ifstream& infile);
 
 #endif

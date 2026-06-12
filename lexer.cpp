@@ -1,5 +1,6 @@
 // this program is a lexical analyzer for the Cooke programming language
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <cctype>
@@ -14,10 +15,14 @@ int error_line = 1;
 std::string token_name;
 std::string lexeme;
 
+// local function declarations
+static void add_char();
+static void get_char(std::ifstream& infile);
+static void get_non_blank(std::ifstream& infile);
+
 // local variables
 static int char_class;
 static char next_char;
-static FILE *infile;
 static const std::unordered_map<std::string, std::pair<int, std::string>> TOKENS = {
     {":=", {ASSIGN_OP, "ASSIGN_OP"}},
     {"<", {LESSER_OP, "LESSER_OP"}},
@@ -45,31 +50,23 @@ static const std::unordered_map<std::string, std::pair<int, std::string>> TOKENS
     {"end", {KEY_END, "KEY_END"}}
 };
 
-// local function declarations
-static void add_char();
-static void get_char();
-static void get_non_blank();
-
-// main function
 int main(int argc, char* argv[]) {
-    infile = fopen(argv[1], "r");
-
-    if (argv[1] == NULL) {
-        exit(2);
+    if (argc < 2) {
+        std::cerr << "error: no input file provided\n";
+        return 2;
     }
 
-    if (infile == NULL) {
-        std::cout << "ERROR - cannot open file \n";
-        exit(3);
-    } else {
-        // display R#
-        std::cout << "Cooke Analyzer\n" << std::endl;
-        get_char();
-        // do {
-            lex();
-            program();
-        // } while (next_token != EOF);
-    }
+    // infile = fopen(argv[1], "r");
+    std::ifstream infile {argv[1]};
+    if (!infile) {
+        std::cerr << "error: cannot open file\n";
+        return 3;
+    } 
+
+    std::cout << "Cooke Analyzer\n\n";
+    get_char(infile);
+    lex(infile);
+    program(infile);
 
     return 0;
 }
@@ -96,8 +93,8 @@ static void add_char() {
 }
 
 // a function to get the next character of input and determine its character class
-static void get_char() {
-    if ((next_char = getc(infile)) != EOF) {
+static void get_char(std::ifstream& infile) {
+    if ((infile.get(next_char))) {
         if (isalpha(next_char))
             char_class = LETTER;
         else if (isdigit(next_char))
@@ -110,29 +107,29 @@ static void get_char() {
 }
 
 // a function to call get_char until it returns a non-whitespace character
-static void get_non_blank() {
-    while (isspace(next_char)) {
+static void get_non_blank(std::ifstream& infile) {
+    while (char_class != EOF && isspace(next_char)) {
         if (next_char == '\n') {
             error_line++;
         }
-        get_char();
+        get_char(infile);
     
     }
 }
 
 // a lexical analyzer
-int lex() {
+int lex(std::ifstream& infile) {
     lexeme = "";
-    get_non_blank();
+    get_non_blank(infile);
 
     switch (char_class) {
         // parse identifiers
         case LETTER:
             add_char();
-            get_char();
+            get_char(infile);
             while (char_class == LETTER || char_class == DIGIT) {
                 add_char();
-                get_char();
+                get_char(infile);
             }
 
             lookup();
@@ -148,10 +145,10 @@ int lex() {
         // parse integer literals
         case DIGIT:
             add_char();
-            get_char();
+            get_char(infile);
             while (char_class == DIGIT) {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             next_token = INT_LIT;
             token_name = "INT_LIT";
@@ -160,35 +157,35 @@ int lex() {
         // non alphabetical or numeric characters
         case CHAR:
             add_char();
-            get_char();
+            get_char(infile);
 
             if (lexeme == ":" && next_char == '=') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             else if (lexeme == "<" && next_char == '>') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             else if (lexeme == "<" && next_char == '=') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             else if (lexeme == ">" && next_char == '=') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             else if (lexeme == "*" && next_char == '*') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             else if (lexeme == "+" && next_char == '+') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             else if (lexeme == "-" && next_char == '-') {
                 add_char();
-                get_char();
+                get_char(infile);
             }
             
             lookup();
@@ -201,7 +198,7 @@ int lex() {
             break;
     }
 
-    if (lexeme != "EOF") {
+    if (next_token != EOF) {
         std::cout << lexeme << "\t" << token_name << std::endl;
     }
     return next_token;
